@@ -60,7 +60,7 @@ export type NodeDataValue =
 	| FileValue
 	| null;
 export type NodeData = Record<string, NodeDataValue>;
-export type NodeStatus = "idle" | "running" | "done" | "error";
+export type NodeStatus = "idle" | "running" | "done" | "error" | "skipped";
 
 export interface WFNode {
 	id: string;
@@ -77,6 +77,10 @@ export interface WFNode {
 	endpoint?: string;
 	endpoints?: EndpointChoice[];
 	fn?: string;
+	/** When true, the canvas asks before calling this node's Python fn. */
+	confirm_before_run?: boolean;
+	/** Alias of `confirm_before_run`. */
+	confirm?: boolean;
 	inputs: Port[];
 	outputs: Port[];
 	x: number;
@@ -174,6 +178,10 @@ export interface OperatorNode extends BaseNode {
 	endpoints?: EndpointChoice[];
 	pipeline_tag?: string;
 	fn?: string;
+	/** When true, the canvas asks before calling this node's Python fn. */
+	confirm_before_run?: boolean;
+	/** Alias of `confirm_before_run`. */
+	confirm?: boolean;
 	/** HF Inference provider override (e.g. "hf-inference", "together", "replicate"). Defaults to "auto" — let HF route. */
 	provider?: string;
 	/** Where this operator executes. Default inherited from workflow.runtime.default. */

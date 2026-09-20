@@ -17,6 +17,8 @@
 		label: string;
 		inputs: { id: string; label: string; type: string }[];
 		outputs: { id: string; label: string; type: string }[];
+		confirm_before_run?: boolean;
+		confirm?: boolean;
 	}
 
 	interface Props {

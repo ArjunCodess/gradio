@@ -314,6 +314,8 @@ export function addNode(
 				pipeline_tag: template.pipeline_tag,
 				provider: template.provider,
 				fn: template.fn,
+				confirm_before_run: template.confirm_before_run || template.confirm,
+				confirm: template.confirm || template.confirm_before_run,
 				runtime: template.runtime
 			},
 			x,

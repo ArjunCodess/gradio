@@ -504,6 +504,29 @@ class TestWorkflowFromBind:
         node = result["nodes"][0]
         assert node["inputs"][0]["type"] == "text"
 
+    def test_confirm_before_run_flag_from_fn_attr(self):
+        def train(epochs: int) -> str:
+            return str(epochs)
+
+        train.confirm_before_run = True  # type: ignore[attr-defined]
+        result = json.loads(_workflow_from_bind({"train": train}))
+        assert result["nodes"][0]["confirm_before_run"] is True
+
+    def test_confirm_alias_and_decorator(self):
+        def billed(x: str) -> str:
+            return x
+
+        billed.confirm = True  # type: ignore[attr-defined]
+        from_alias = json.loads(_workflow_from_bind({"billed": billed}))
+        assert from_alias["nodes"][0]["confirm_before_run"] is True
+
+        @workflow_module.confirm_before_run
+        def train(epochs: int) -> str:
+            return str(epochs)
+
+        from_decorator = json.loads(_workflow_from_bind({"train": train}))
+        assert from_decorator["nodes"][0]["confirm_before_run"] is True
+
     def test_edges_resolve_by_function_name(self):
         result = json.loads(
             _workflow_from_bind(

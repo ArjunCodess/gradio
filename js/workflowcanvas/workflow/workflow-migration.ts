@@ -133,6 +133,8 @@ export function migrateToV2(raw: unknown): Workflow {
 				pipeline_tag: n.pipeline_tag,
 				provider: n.provider,
 				fn: n.fn,
+				confirm_before_run: n.confirm_before_run || n.confirm,
+				confirm: n.confirm || n.confirm_before_run,
 				runtime: "client"
 			});
 			continue;
@@ -246,6 +248,8 @@ export function toLegacyShape(wf: Workflow): {
 			pipeline_tag: n.pipeline_tag,
 			provider: n.provider,
 			fn: n.fn,
+			confirm_before_run: n.confirm_before_run || n.confirm,
+			confirm: n.confirm || n.confirm_before_run,
 			inputs: n.inputs,
 			outputs: n.outputs,
 			x: n.x,

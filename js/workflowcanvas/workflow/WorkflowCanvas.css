@@ -679,6 +679,51 @@
 	color: #fff;
 }
 
+.wf-modal-btn-primary {
+	background: #3d6bff;
+	border-color: #3d6bff;
+	color: #fff;
+}
+
+.wf-modal-btn-primary:hover {
+	background: #4d78ff;
+	border-color: #4d78ff;
+	color: #fff;
+}
+
+.wf-modal-inputs {
+	margin: 0 0 16px;
+	padding: 8px 10px;
+	border: 1px solid #2a2b36;
+	border-radius: 8px;
+	max-height: 180px;
+	overflow: auto;
+}
+
+.wf-modal-input-row {
+	display: grid;
+	grid-template-columns: 88px 1fr;
+	gap: 8px;
+	font-size: 12px;
+	padding: 4px 0;
+}
+
+.wf-modal-input-row + .wf-modal-input-row {
+	border-top: 1px solid #2a2b36;
+}
+
+.wf-modal-input-row dt {
+	color: #8b8d98;
+	font-weight: 600;
+	margin: 0;
+}
+
+.wf-modal-input-row dd {
+	margin: 0;
+	color: #d5d6de;
+	word-break: break-word;
+}
+
 :global(body:not(.dark)) .wf-modal-backdrop {
 	background: rgba(20, 22, 28, 0.35);
 }
@@ -710,6 +755,22 @@
 	background: rgba(0, 0, 0, 0.04);
 	color: #2c2e36;
 	border-color: #c8cad2;
+}
+
+:global(body:not(.dark)) .wf-modal-inputs {
+	border-color: #e2e4ea;
+}
+
+:global(body:not(.dark)) .wf-modal-input-row + .wf-modal-input-row {
+	border-top-color: #e2e4ea;
+}
+
+:global(body:not(.dark)) .wf-modal-input-row dt {
+	color: #6e7079;
+}
+
+:global(body:not(.dark)) .wf-modal-input-row dd {
+	color: #2c2e36;
 }
 
 .drop-menu {

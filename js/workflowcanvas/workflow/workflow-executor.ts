@@ -57,6 +57,15 @@ type StreamTextFn = (
 	onChunk: (delta: string, accumulated: string) => void,
 	params?: Record<string, string | number>
 ) => Promise<string>;
+/** Return false to skip the node without marking it failed. */
+type ConfirmFn = (
+	node: WFNode,
+	inputs: Record<string, NodeDataValue>
+) => Promise<boolean>;
+
+function node_wants_confirm(node: WFNode): boolean {
+	return !!(node.confirm_before_run || node.confirm);
+}
 
 async function toDataUrl(url: string): Promise<string> {
 	if (/^data:/.test(url)) return url;
@@ -335,11 +344,13 @@ export async function executeWorkflow(
 	serverCallModel?: ServerCallModelFn,
 	serverFetchDataset?: ServerFetchDatasetFn,
 	serverCallFn?: ServerCallPyFn,
-	stream_text_generation?: StreamTextFn
+	stream_text_generation?: StreamTextFn,
+	confirmFn?: ConfirmFn
 ): Promise<void> {
 	const { nodes, edges } = toLegacyShape(workflow);
 	const dataMap: Record<string, Record<string, NodeDataValue>> = {};
 	const failed_nodes = new Map<string, string>();
+	const skipped_nodes = new Map<string, string>();
 
 	function mark_node_failed(node: WFNode, err: unknown): void {
 		const msg = err instanceof Error ? err.message : String(err);
@@ -348,6 +359,21 @@ export async function executeWorkflow(
 		failed_nodes.set(node.id, node.label);
 		dataMap[node.id] = {};
 		for (const port of node.outputs) dataMap[node.id][port.id] = null;
+	}
+
+	function mark_node_skipped(node: WFNode): void {
+		onStatus(node.id, "skipped");
+		skipped_nodes.set(node.id, node.label);
+		dataMap[node.id] = {};
+		for (const port of node.outputs) dataMap[node.id][port.id] = null;
+	}
+
+	function upstream_was_skipped(node: WFNode, port: Port): boolean {
+		const edge = edges.find(
+			(e) => e.to_node_id === node.id && e.to_port_id === port.id
+		);
+		if (!edge) return false;
+		return skipped_nodes.has(edge.from_node_id);
 	}
 
 	function missing_input_message(node: WFNode, port: Port): string {
@@ -469,16 +495,28 @@ export async function executeWorkflow(
 
 		// Python function nodes (FnNode) call back to the Python server
 		if (node.source === "fn" && node.fn) {
-			onStatus(node.id, "running");
 			try {
 				if (!serverCallFn)
 					throw new Error("Python function call not available");
 				const inputs = resolveInputs(node, edges, dataMap);
 				for (const port of node.inputs) {
 					if (port.required && inputs[port.id] === null) {
+						if (upstream_was_skipped(node, port)) {
+							mark_node_skipped(node);
+							return;
+						}
 						throw new Error(missing_input_message(node, port));
 					}
 				}
+				if (node_wants_confirm(node)) {
+					const ok = confirmFn ? await confirmFn(node, inputs) : true;
+					if (signal?.aborted) return;
+					if (!ok) {
+						mark_node_skipped(node);
+						return;
+					}
+				}
+				onStatus(node.id, "running");
 				const args = await Promise.all(
 					node.inputs.map((port) =>
 						MEDIA_PORT_TYPES.has(port.type)
@@ -512,15 +550,18 @@ export async function executeWorkflow(
 		}
 
 		if (node.kind === "transform" && (node.space_id || node.model_id)) {
-			onStatus(node.id, "running");
-
 			try {
 				const inputs = resolveInputs(node, edges, dataMap);
 				for (const port of node.inputs) {
 					if (port.required && inputs[port.id] === null) {
+						if (upstream_was_skipped(node, port)) {
+							mark_node_skipped(node);
+							return;
+						}
 						throw new Error(missing_input_message(node, port));
 					}
 				}
+				onStatus(node.id, "running");
 				const tag = node.pipeline_tag ?? "text-generation";
 				const streamable =
 					node.source === "model" &&

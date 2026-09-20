@@ -255,6 +255,7 @@ def _workflow_from_bind(
                 "inputs": inputs,
                 "outputs": outputs,
                 "data": {},
+                **({"confirm_before_run": True} if _fn_wants_confirm(fn) else {}),
             }
         )
 
@@ -262,6 +263,28 @@ def _workflow_from_bind(
     return json.dumps(
         {"version": "1", "name": name, "nodes": nodes, "edges": edge_dicts}
     )
+
+
+def _fn_wants_confirm(fn: Callable) -> bool:
+    return bool(
+        getattr(fn, "confirm_before_run", False) or getattr(fn, "confirm", False)
+    )
+
+
+def confirm_before_run(fn: Callable) -> Callable:
+    """Mark a bound workflow function so the canvas asks before running it.
+
+    Example:
+        ```python
+        @gr.confirm_before_run
+        def train(epochs: int) -> str:
+            ...
+
+        gr.Workflow(bind={"train": train}).launch()
+        ```
+    """
+    fn.confirm_before_run = True  # type: ignore[attr-defined]
+    return fn
 
 
 def _get_locally_saved_hf_token() -> str | None:
@@ -1792,7 +1815,9 @@ class Workflow(Blocks):
                 exist.
             bind: Functions callable from the canvas frontend via the `call_fn` server
                 function. Pass a list of callables (keys default to ``fn.__name__``) or
-                a dict mapping explicit names to callables.
+                a dict mapping explicit names to callables. Set ``fn.confirm_before_run
+                = True`` (or wrap with ``gr.confirm_before_run``) so the canvas shows
+                the node's inputs and asks before calling an expensive function.
             edges: List of ``(from_endpoint, to_endpoint)`` tuples that wire nodes
                 together when generating a workflow from ``bind`` (ignored when an
                 existing ``graph`` file is loaded). Each endpoint is either
@@ -1945,6 +1970,11 @@ class Workflow(Blocks):
                         "label": fn_name,
                         "inputs": inputs,
                         "outputs": outputs,
+                        **(
+                            {"confirm_before_run": True}
+                            if _fn_wants_confirm(fn)
+                            else {}
+                        ),
                     }
                 )
             return json.dumps(templates)

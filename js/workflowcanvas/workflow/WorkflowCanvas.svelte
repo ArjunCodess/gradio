@@ -654,6 +654,54 @@
 	let savingToSpace = $state(false);
 	let saveAsCopyConfirm = $state(false);
 	let savingAsCopy = $state(false);
+	let confirmPrompt = $state<{
+		nodeLabel: string;
+		rows: { label: string; value: string }[];
+		resolve: (ok: boolean) => void;
+	} | null>(null);
+
+	function formatConfirmValue(value: NodeDataValue): string {
+		if (value == null) return "(empty)";
+		if (typeof value === "object" && !Array.isArray(value) && "name" in value) {
+			return value.name || value.url || "(file)";
+		}
+		if (typeof value === "object") {
+			try {
+				const s = JSON.stringify(value);
+				return s.length > 200 ? `${s.slice(0, 200)}…` : s;
+			} catch {
+				return String(value);
+			}
+		}
+		const s = String(value);
+		return s.length > 200 ? `${s.slice(0, 200)}…` : s;
+	}
+
+	function askConfirm(
+		node: WFNode,
+		inputs: Record<string, NodeDataValue>
+	): Promise<boolean> {
+		if (abortController?.signal.aborted) return Promise.resolve(false);
+		return new Promise((resolve) => {
+			const finish = (ok: boolean): void => {
+				abortController?.signal.removeEventListener("abort", onAbort);
+				confirmPrompt = null;
+				resolve(ok);
+			};
+			const onAbort = (): void => finish(false);
+			abortController?.signal.addEventListener("abort", onAbort, {
+				once: true
+			});
+			confirmPrompt = {
+				nodeLabel: node.label || node.fn || "this node",
+				rows: node.inputs.map((port) => ({
+					label: port.label || port.id,
+					value: formatConfirmValue(inputs[port.id] ?? null)
+				})),
+				resolve: finish
+			};
+		});
+	}
 	const copyCandidates = $derived(fork_repo_candidates(auth.user, spaceId));
 	const copyRepo = $derived(copyCandidates[0] ?? "");
 	$effect(() => {
@@ -2242,7 +2290,8 @@
 							signal: signal ?? undefined,
 							onChunk
 						})
-				: undefined
+				: undefined,
+			askConfirm
 		);
 
 		running = false;
@@ -2849,6 +2898,7 @@
 				kind: "fn",
 				source: "fn",
 				fn: tmpl.fn,
+				confirm_before_run: tmpl.confirm_before_run || tmpl.confirm,
 				inputs: tmpl.inputs,
 				outputs: tmpl.outputs,
 				width: 220,
@@ -3510,6 +3560,51 @@
 					>
 					<button class="wf-modal-btn wf-modal-btn-danger" onclick={saveAsCopy}
 						>Duplicate & save</button
+					>
+				</div>
+			</div>
+		</div>
+	{/if}
+
+	{#if confirmPrompt}
+		<!-- svelte-ignore a11y_click_events_have_key_events -->
+		<!-- svelte-ignore a11y_no_static_element_interactions -->
+		<div
+			class="wf-modal-backdrop"
+			onclick={() => confirmPrompt?.resolve(false)}
+		>
+			<div
+				class="wf-modal"
+				role="dialog"
+				aria-modal="true"
+				aria-labelledby="wf-confirm-run-title"
+				onclick={(e) => e.stopPropagation()}
+			>
+				<div class="wf-modal-title" id="wf-confirm-run-title">
+					Run {confirmPrompt.nodeLabel}?
+				</div>
+				<div class="wf-modal-body">
+					This node is marked to confirm before running. Check the inputs, then
+					run or skip.
+				</div>
+				{#if confirmPrompt.rows.length > 0}
+					<dl class="wf-modal-inputs">
+						{#each confirmPrompt.rows as row}
+							<div class="wf-modal-input-row">
+								<dt>{row.label}</dt>
+								<dd>{row.value}</dd>
+							</div>
+						{/each}
+					</dl>
+				{/if}
+				<div class="wf-modal-actions">
+					<button
+						class="wf-modal-btn"
+						onclick={() => confirmPrompt?.resolve(false)}>Skip</button
+					>
+					<button
+						class="wf-modal-btn wf-modal-btn-primary"
+						onclick={() => confirmPrompt?.resolve(true)}>Run</button
 					>
 				</div>
 			</div>

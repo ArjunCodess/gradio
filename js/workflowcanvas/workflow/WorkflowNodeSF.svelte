@@ -383,6 +383,7 @@
 	class:node-running={status === "running"}
 	class:node-done={status === "done"}
 	class:node-error={status === "error"}
+	class:node-skipped={status === "skipped"}
 	class:node-stale={isStale}
 	class:node-required-input={requirement === "required"}
 	class:node-selected={selected}
@@ -1078,6 +1079,12 @@
 	.wf-node.node-error {
 		border-color: #ef4444;
 		box-shadow: 0 0 12px rgba(239, 68, 68, 0.15);
+	}
+
+	.wf-node.node-skipped {
+		border-color: #64748b;
+		box-shadow: 0 0 12px rgba(100, 116, 139, 0.15);
+		opacity: 0.78;
 	}
 
 	/* Stale: ran successfully, but inputs have since changed. Subtle dashed

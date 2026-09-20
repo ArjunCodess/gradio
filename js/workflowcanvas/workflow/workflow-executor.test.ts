@@ -770,3 +770,118 @@ describe("executeWorkflow — cascading failure messages", () => {
 		expect(errors.d).toContain("moondream2");
 	});
 });
+
+describe("executeWorkflow — confirm before running fn nodes", () => {
+	function fnOp(
+		id: string,
+		fnName: string,
+		overrides: Partial<OperatorNode> = {}
+	): OperatorNode {
+		return {
+			id,
+			role: "operator",
+			kind: "fn",
+			label: fnName,
+			fn: fnName,
+			inputs: [{ id: "in", label: "text", type: "text" }],
+			outputs: [{ id: "out", label: "output", type: "text" }],
+			data: { in: "hello" },
+			x: 0,
+			y: 0,
+			width: 200,
+			height: 80,
+			runtime: "client",
+			...overrides
+		};
+	}
+
+	test("cancel skips the node and does not call python", async () => {
+		const callFn = vi.fn().mockResolvedValue(JSON.stringify(["ok"]));
+		const confirmFn = vi.fn().mockResolvedValue(false);
+		const { onStatus, statuses, errors } = statusBag();
+		await executeWorkflow(
+			emptyV2([fnOp("n1", "expensive", { confirm_before_run: true })]),
+			onStatus,
+			() => {},
+			undefined,
+			undefined,
+			undefined,
+			undefined,
+			callFn as unknown as Parameters<typeof executeWorkflow>[7],
+			undefined,
+			confirmFn
+		);
+		expect(callFn).not.toHaveBeenCalled();
+		expect(confirmFn).toHaveBeenCalledOnce();
+		expect(statuses.n1).toBe("skipped");
+		expect(errors.n1).toBeUndefined();
+	});
+
+	test("accept calls python and marks the node done", async () => {
+		const callFn = vi.fn().mockResolvedValue(JSON.stringify(["ok"]));
+		const confirmFn = vi.fn().mockResolvedValue(true);
+		const { onStatus, statuses } = statusBag();
+		await executeWorkflow(
+			emptyV2([fnOp("n1", "expensive", { confirm: true })]),
+			onStatus,
+			() => {},
+			undefined,
+			undefined,
+			undefined,
+			undefined,
+			callFn as unknown as Parameters<typeof executeWorkflow>[7],
+			undefined,
+			confirmFn
+		);
+		expect(callFn).toHaveBeenCalledOnce();
+		expect(statuses.n1).toBe("done");
+	});
+
+	test("skipped upstream skips a required downstream instead of failing it", async () => {
+		const callFn = vi.fn().mockImplementation(async (name: string) => {
+			return JSON.stringify([name]);
+		});
+		const confirmFn = vi.fn().mockResolvedValue(false);
+		const upstream = fnOp("u", "expensive", { confirm_before_run: true });
+		const downstream: OperatorNode = {
+			id: "d",
+			role: "operator",
+			kind: "fn",
+			label: "consumer",
+			fn: "consumer",
+			inputs: [{ id: "in", label: "Prompt", type: "text", required: true }],
+			outputs: [{ id: "out", label: "out", type: "text" }],
+			data: {},
+			x: 0,
+			y: 0,
+			width: 200,
+			height: 80,
+			runtime: "client"
+		};
+		const edge: WFEdge = {
+			id: "e1",
+			from_node_id: "u",
+			from_port_id: "out",
+			to_node_id: "d",
+			to_port_id: "in",
+			type: "text"
+		};
+		const { onStatus, statuses, errors } = statusBag();
+		await executeWorkflow(
+			emptyV2([upstream, downstream], [], [edge]),
+			onStatus,
+			() => {},
+			undefined,
+			undefined,
+			undefined,
+			undefined,
+			callFn as unknown as Parameters<typeof executeWorkflow>[7],
+			undefined,
+			confirmFn
+		);
+		expect(callFn).not.toHaveBeenCalled();
+		expect(statuses.u).toBe("skipped");
+		expect(statuses.d).toBe("skipped");
+		expect(errors.d).toBeUndefined();
+	});
+});

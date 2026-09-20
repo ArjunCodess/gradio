@@ -139,7 +139,7 @@ from gradio.templates import (
 )
 from gradio.themes import Base as Theme
 from gradio.utils import NO_RELOAD, FileSize, get_package_version, set_static_paths
-from gradio.workflow import Workflow
+from gradio.workflow import Workflow, confirm_before_run
 
 # this is the version:
 __version__ = get_package_version()
@@ -286,5 +286,6 @@ __all__ = [
     "get_file",
     "validators",
     "Workflow",
+    "confirm_before_run",
     "WorkflowCanvas",
 ]
