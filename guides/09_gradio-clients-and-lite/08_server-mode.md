@@ -1,14 +1,16 @@
-# Server mode
+# Server mode (`gr.Server`)
 
 Tags: API, MCP, FASTAPI, SERVER
 
-In this post, we will demonstrate how to build a completely custom frontend for your Gradio application, while still utilizing Gradio's backend, which means you still get an API server with queuing and streaming, MCP tool support, ZeroGPU support, and hosting on Hugging Face Spaces.
+`gr.Server` is Gradio's backend without Gradio's UI. You keep the queue, streaming, MCP tools, ZeroGPU, and Spaces hosting, and you bring your own frontend (HTML, React, Svelte, or none at all).
 
-To do this, you use **Server mode**: instantiate `gradio.Server` directly. The `gradio.Server` class is a FastAPI server with Gradio's API engine built in, so you get all the backend benefits with complete flexibility on what kind of frontend (e.g. a React app, a simple HTML page, or any vibe-coded frontend), if any, you'd like to launch alongside the backend server.
+Talk to it with the [JavaScript client](/guides/getting-started-with-the-js-client) or the [Python client](/guides/getting-started-with-the-python-client). That is the intended way to build a custom Gradio app: `gr.Server` on the Python side, `@gradio/client` in the browser.
 
-## When to use `gradio.Server`
+To do this, instantiate `gr.Server` directly. It is a FastAPI server with Gradio's API engine built in.
 
-Use `gradio.Server` instead of `gr.Blocks` when any of the following apply:
+## When to use `gr.Server`
+
+Use `gr.Server` instead of `gr.Blocks` when any of the following apply:
 
 - You want a **completely custom (potentially vibe-coded) UI** (your own HTML, React, Svelte, etc.) powered by Gradio's backend
 - You want **full FastAPI control** (custom GET/POST routes, middleware, dependency injection) alongside Gradio API endpoints
@@ -18,7 +20,7 @@ If you're happy with Gradio's built-in UI components, use `gr.Blocks`, `gr.ChatI
 
 ## Installation
 
-`gradio.Server` is included in the main Gradio package. If you want MCP support, install the extra:
+`gr.Server` is included in the main Gradio package. If you want MCP support, install the extra:
 
 ```bash
 pip install "gradio[mcp]"
@@ -26,12 +28,12 @@ pip install "gradio[mcp]"
 
 ## A Minimal Example
 
-Here's the simplest possible Server mode app — a single API endpoint with no UI:
+Here's the simplest possible `gr.Server` app — a single API endpoint with no UI:
 
 ```python
-from gradio import Server
+import gradio as gr
 
-app = Server()
+app = gr.Server()
 
 @app.api(name="hello")
 def hello(name: str) -> str:
@@ -56,15 +58,25 @@ result = client.predict("World", api_name="/hello")
 print(result)  # "Hello, World!"
 ```
 
+Or from JavaScript, which is what a custom frontend should use:
+
+```js
+import { Client } from "@gradio/client";
+
+const app = await Client.connect("http://localhost:7860");
+const result = await app.predict("/hello", { name: "World" });
+console.log(result.data);  // ["Hello, World!"]
+```
+
 ## Custom Routes
 
-Since `gradio.Server` inherits from FastAPI, you can add any route directly:
+Since `gr.Server` inherits from FastAPI, you can add any route directly:
 
 ```python
-from gradio import Server
+import gradio as gr
 from fastapi.responses import HTMLResponse
 
-app = Server()
+app = gr.Server()
 
 @app.api(name="hello")
 def hello(name: str) -> str:
@@ -90,9 +102,9 @@ You can also use all standard FastAPI features — `app.add_middleware()`, `app.
 To expose your API endpoints as MCP tools, add the `@app.mcp.tool()` decorator and pass `mcp_server=True` to `launch()`:
 
 ```python
-from gradio import Server
+import gradio as gr
 
-app = Server()
+app = gr.Server()
 
 @app.mcp.tool(name="hello")
 @app.api(name="hello")
@@ -107,7 +119,7 @@ The `@app.mcp.tool()` and `@app.api()` decorators are independent — you can ha
 
 ## A Complete Example with the JavaScript Client
 
-This example combines everything: custom HTML served at `/`, Gradio API endpoints with concurrency limits, MCP tools, and a custom REST endpoint, and two connected via [the Gradio JavaScript client](/guides/getting-started-with-the-js-client).
+This example combines everything: custom HTML served at `/`, Gradio API endpoints with concurrency limits, MCP tools, and a custom REST endpoint, wired up with [the Gradio JavaScript client](/guides/getting-started-with-the-js-client).
 
 $code_server_app
 
@@ -119,7 +131,7 @@ python run.py
 
 Then open `http://localhost:7860` in your browser. The custom HTML page uses the `@gradio/client` JavaScript library to call the Gradio API endpoints. Meanwhile, the same endpoints are available as MCP tools and through the REST API at `/gradio_api/call/add` and `/gradio_api/call/multiply`.
 
-Note: if your `Server` app uses ZeroGPU, you _must_ call Gradio API endpoints through `@gradio/client` from the browser. The JavaScript client forwards the Hugging Face iframe auth headers needed for ZeroGPU quota handling.
+Note: if your `gr.Server` app uses ZeroGPU, you _must_ call Gradio API endpoints through `@gradio/client` from the browser. The JavaScript client forwards the Hugging Face iframe auth headers needed for ZeroGPU quota handling.
 
 ## Concurrency and Streaming
 

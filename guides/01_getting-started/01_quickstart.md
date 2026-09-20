@@ -105,9 +105,9 @@ Gradio includes another high-level class, `gr.ChatInterface`, which is specifica
 That's the gist of the core `gradio` Python library, but Gradio is actually so much more! It's an entire ecosystem of Python and JavaScript libraries that let you build machine learning applications, or query them programmatically, in Python or JavaScript. Here are other related parts of the Gradio ecosystem:
 
 * [Gradio Python Client](https://www.gradio.app/guides/getting-started-with-the-python-client) (`gradio_client`): query any Gradio app programmatically in Python.
-* [Gradio JavaScript Client](https://www.gradio.app/guides/getting-started-with-the-js-client) (`@gradio/client`): query any Gradio app programmatically in JavaScript.
+* [Gradio JavaScript Client](https://www.gradio.app/guides/getting-started-with-the-js-client) (`@gradio/client`): query any Gradio app programmatically in JavaScript, including custom `gr.Server` frontends.
 * [Hugging Face Spaces](https://huggingface.co/spaces): the most popular place to host Gradio applications — for free!
-* [Server mode](https://www.gradio.app/guides/server-mode) (`gradio.Server`): build a completely custom frontend using only Gradio's backend (queue, streaming, MCP, ZeroGPU, and Spaces hosting included).
+* [Server mode](https://www.gradio.app/guides/server-mode) (`gr.Server`): build a completely custom frontend using only Gradio's backend (queue, streaming, MCP, ZeroGPU, and Spaces hosting included). Call it with `@gradio/client`.
 
 ## What's Next?
 

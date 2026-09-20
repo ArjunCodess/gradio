@@ -2,7 +2,7 @@
 
 Tags: CLIENT, API, SPACES
 
-The Gradio JavaScript Client makes it very easy to use any Gradio app as an API. As an example, consider this [Hugging Face Space that transcribes audio files](https://huggingface.co/spaces/abidlabs/whisper) that are recorded from the microphone.
+The Gradio JavaScript Client makes it very easy to use any Gradio app as an API. That includes a regular `gr.Interface` / `gr.Blocks` app **and** a custom frontend talking to [`gr.Server`](/guides/server-mode). As an example, consider this [Hugging Face Space that transcribes audio files](https://huggingface.co/spaces/abidlabs/whisper) that are recorded from the microphone.
 
 ![](https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/gradio-guides/whisper-screenshot.jpg)
 
@@ -25,7 +25,9 @@ console.log(transcription.data);
 // [ "I said the same phrase 30 times." ]
 ```
 
-The Gradio Client works with any hosted Gradio app, whether it be an image generator, a text summarizer, a stateful chatbot, a tax calculator, or anything else! The Gradio Client is mostly used with apps hosted on [Hugging Face Spaces](https://hf.space), but your app can be hosted anywhere, such as your own server.
+The Gradio Client works with any hosted Gradio app, whether it be an image generator, a text summarizer, a stateful chatbot, a tax calculator, or a [`gr.Server`](/guides/server-mode) app with your own HTML/React UI. The Gradio Client is mostly used with apps hosted on [Hugging Face Spaces](https://hf.space), but your app can be hosted anywhere, such as your own server.
+
+If you are building the frontend yourself, start with [`gr.Server`](/guides/server-mode) and call it from this client. That is how custom Gradio apps get queuing, streaming, MCP tools, ZeroGPU, and Spaces hosting without Gradio components.
 
 **Prequisites**: To use the Gradio client, you do _not_ need to know the `gradio` library in great detail. However, it is helpful to have general familiarity with Gradio's concepts of input and output components.
 
@@ -129,6 +131,17 @@ import { Client } from "@gradio/client";
 
 const app = Client.connect("https://bec81a83-5b5c-471e.gradio.live");
 ```
+
+The same call works for a local `gr.Server` app:
+
+```js
+import { Client } from "@gradio/client";
+
+const app = await Client.connect("http://localhost:7860");
+const result = await app.predict("/hello", { name: "World" });
+```
+
+`/hello` here is the `name=` you passed to `@app.api()`. If that `gr.Server` app uses ZeroGPU, call it from the **browser** with `@gradio/client` so the Hugging Face iframe auth headers are forwarded. See [Server mode](/guides/server-mode) for the Python side.
 
 ## Connecting to a Gradio app with auth
 
