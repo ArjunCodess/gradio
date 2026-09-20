@@ -1,7 +1,7 @@
 import tempfile
 from unittest.mock import patch
 
-import httpx
+import httpx2 as httpx
 import huggingface_hub
 import pytest
 from huggingface_hub.hf_api import SpaceInfo

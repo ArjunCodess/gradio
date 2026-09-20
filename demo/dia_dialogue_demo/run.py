@@ -1,5 +1,5 @@
 import gradio as gr
-import httpx
+import httpx2 as httpx
 
 
 tags = [

@@ -12,7 +12,7 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import gradio as gr
-import httpx
+import httpx2 as httpx
 import huggingface_hub
 import pytest
 from huggingface_hub.utils import RepositoryNotFoundError
@@ -115,7 +115,7 @@ class TestClientInitialization:
             Client, "_get_space_state", lambda _: huggingface_hub.SpaceStage.RUNNING
         )
 
-        with patch("httpx.get") as mocked:
+        with patch("httpx2.get") as mocked:
             mocked.return_value = httpx.Response(
                 200,
                 json={
@@ -135,7 +135,7 @@ class TestClientInitialization:
         # _login overrides cookies
         response = httpx.Response(200)
         response._cookies = httpx.Cookies(cookies)
-        with patch("httpx.post", return_value=response) as mocked:
+        with patch("httpx2.post", return_value=response) as mocked:
             client._login(("user", "pass"))
             mocked.assert_called_once()
             call = mocked.call_args
@@ -1052,7 +1052,7 @@ class TestEndpoints:
             "file6",
             "file7",
         ]
-        with patch("httpx.post", MagicMock(return_value=response)):
+        with patch("httpx2.post", MagicMock(return_value=response)):
             with patch("builtins.open", MagicMock()):
                 with patch.object(pathlib.Path, "name") as mock_name:
                     mock_name.side_effect = lambda x: x
@@ -1084,8 +1084,8 @@ class TestEndpoints:
         upload_response.json.return_value = ["/tmp/gradio/uploaded/private-cat.png"]
 
         with (
-            patch("httpx.stream", return_value=download_response) as stream,
-            patch("httpx.post", return_value=upload_response) as post,
+            patch("httpx2.stream", return_value=download_response) as stream,
+            patch("httpx2.post", return_value=upload_response) as post,
         ):
             result = endpoint._upload_file(
                 {
@@ -1129,7 +1129,7 @@ class TestEndpoints:
             src_prefixed="https://source.hf.space/gradio_api/",
         )
 
-        with patch("httpx.stream") as stream:
+        with patch("httpx2.stream") as stream:
             result = endpoint._upload_file(file_data, data_index=0)
 
         stream.assert_not_called()
@@ -1332,7 +1332,7 @@ def test_httpx_kwargs(increment_demo):
     with connect(
         increment_demo, client_kwargs={"httpx_kwargs": {"timeout": 5}}
     ) as client:
-        with patch("httpx.post", MagicMock()) as mock_post:
+        with patch("httpx2.post", MagicMock()) as mock_post:
             with pytest.raises(Exception):
                 client.predict(1, api_name="/increment_with_queue")
             assert mock_post.call_args.kwargs["timeout"] == 5

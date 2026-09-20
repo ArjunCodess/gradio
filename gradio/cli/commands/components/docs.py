@@ -5,7 +5,7 @@ import re
 from pathlib import Path
 from typing import Annotated, Any
 
-import httpx
+import httpx2 as httpx
 import tomlkit as toml
 from typer import Argument, Option
 

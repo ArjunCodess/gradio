@@ -5,7 +5,7 @@ from functools import partial
 from string import capwords
 from unittest.mock import MagicMock, patch
 
-import httpx
+import httpx2 as httpx
 import pytest
 
 import gradio

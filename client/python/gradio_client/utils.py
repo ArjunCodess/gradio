@@ -36,7 +36,7 @@ from typing import (
 )
 
 import fsspec.asyn
-import httpx
+import httpx2 as httpx
 import huggingface_hub
 from huggingface_hub import SpaceStage
 

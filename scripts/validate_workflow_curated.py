@@ -14,7 +14,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 from typing import Any, Optional
 
-import httpx
+import httpx2 as httpx
 
 logging.basicConfig(
     level=logging.INFO,

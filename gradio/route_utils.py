@@ -39,7 +39,8 @@ from urllib.parse import quote, urlparse
 import anyio
 import fastapi
 import gradio_client.utils as client_utils
-import httpx
+import httpx as httpx_legacy
+import httpx2 as httpx
 import safehttpx
 from gradio_client.documentation import document
 from python_multipart.exceptions import MultipartParseError
@@ -1420,8 +1421,10 @@ async def secure_url_stream_response(url: str, request: StarletteRequest):
             raise HTTPException(403, f"File not allowed: {url}.") from e
 
         transport = safehttpx.AsyncSecureTransport(verified_ip)
-        client = httpx.AsyncClient(
-            transport=transport, timeout=httpx.Timeout(None, connect=10.0)
+        # AsyncSecureTransport subclasses httpx.AsyncHTTPTransport, so this
+        # client has to stay on httpx until safehttpx supports httpx2.
+        client = httpx_legacy.AsyncClient(
+            transport=transport, timeout=httpx_legacy.Timeout(None, connect=10.0)
         )
         try:
             req = client.build_request(

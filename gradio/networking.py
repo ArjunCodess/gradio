@@ -10,7 +10,7 @@ import time
 import warnings
 from pathlib import Path
 
-import httpx
+import httpx2 as httpx
 
 from gradio.exceptions import ShareCertificateWriteError
 from gradio.routes import App  # HACK: to avoid circular import # noqa: F401

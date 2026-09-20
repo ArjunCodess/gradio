@@ -1,5 +1,5 @@
 def main(url_or_space_id: str, source_directory: str):
-    import httpx
+    import httpx2 as httpx
     from gradio_client.utils import encode_file_path, is_http_url_like
     from huggingface_hub import space_info
     from mcp.server.fastmcp import FastMCP  # type: ignore

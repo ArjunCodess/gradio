@@ -28,7 +28,7 @@ from pathlib import Path
 from threading import Lock
 from typing import Any, Literal
 
-import httpx
+import httpx2 as httpx
 import huggingface_hub
 from huggingface_hub import SpaceHardware, SpaceStage
 from huggingface_hub.utils import (

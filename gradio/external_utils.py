@@ -9,7 +9,7 @@ import math
 import re
 import warnings
 
-import httpx
+import httpx2 as httpx
 import yaml
 from gradio_client.utils import encode_url_or_file_to_base64
 from huggingface_hub import HfApi, ImageClassificationOutputElement, InferenceClient

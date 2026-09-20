@@ -20,7 +20,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, TypeVar
 from urllib.parse import urljoin, urlparse
 
-import httpx
+import httpx2 as httpx
 import numpy as np
 import safehttpx as sh
 from gradio_client import utils as client_utils

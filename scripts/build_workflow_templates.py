@@ -16,7 +16,7 @@ import sys
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Optional
 
-import httpx
+import httpx2 as httpx
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
 logger = logging.getLogger("build_workflow_templates")

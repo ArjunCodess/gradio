@@ -20,7 +20,7 @@ from urllib.parse import parse_qs, unquote, urlparse
 
 import gradio_client as grc
 import gradio_client.utils as client_utils
-import httpx
+import httpx2 as httpx
 import numpy as np
 import pandas as pd
 import pytest

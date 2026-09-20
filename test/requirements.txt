@@ -11,6 +11,7 @@ annotated-types==0.8.0
 anyio==4.14.2
     # via
     #   httpx
+    #   httpx2
     #   openai
     #   starlette
 asttokens==3.0.2
@@ -89,13 +90,16 @@ hf-xet==1.6.0
     # via huggingface-hub
 httpcore==1.0.9
     # via httpx
+httpcore2==2.13.0
+    # via httpx2
 httpx==0.28.1
     # via
-    #   -r test/requirements.in
     #   diffusers
     #   huggingface-hub
     #   openai
     #   respx
+httpx2==2.13.0
+    # via -r test/requirements.in
 huggingface-hub==1.27.0
     # via
     #   -r test/requirements.in
@@ -109,6 +113,7 @@ idna==3.18
     #   anyio
     #   email-validator
     #   httpx
+    #   httpx2
     #   requests
 imageio==2.37.4
     # via scikit-image
@@ -327,6 +332,8 @@ traitlets==5.16.1
     #   nbformat
 transformers==5.15.0
     # via -r test/requirements.in
+truststore==0.10.4
+    # via httpx2
 typer==0.27.1
     # via transformers
 typing-extensions==4.16.0

@@ -27,7 +27,7 @@ from urllib.parse import urlparse, urlunparse
 
 import anyio
 import fastapi
-import httpx
+import httpx2 as httpx
 from anyio import CapacityLimiter
 from gradio_client import utils as client_utils
 from gradio_client.documentation import document

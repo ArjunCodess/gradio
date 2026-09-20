@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
 
 import anyio
-import httpx
+import httpx2 as httpx
 import numpy as np
 from gradio_client import handle_file
 from gradio_client import utils as client_utils

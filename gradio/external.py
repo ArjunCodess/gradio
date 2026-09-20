@@ -12,7 +12,7 @@ from collections.abc import Callable, Generator
 from pathlib import Path
 from typing import TYPE_CHECKING, Literal
 
-import httpx
+import httpx2 as httpx
 import huggingface_hub
 from gradio_client import Client
 from gradio_client.client import Endpoint

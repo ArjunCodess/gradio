@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Any, Literal, Optional, Union
 from unittest.mock import MagicMock, patch
 
-import httpx
+import httpx2 as httpx
 import pytest
 from huggingface_hub import get_token
 
@@ -201,13 +201,13 @@ class AsyncMock(MagicMock):
         return super().__call__(*args, **kwargs)
 
 
-@patch("httpx.post")
+@patch("httpx2.post")
 def test_sleep_successful(mock_post):
     utils.set_space_timeout("gradio/calculator")
 
 
 @patch(
-    "httpx.post",
+    "httpx2.post",
     side_effect=httpx.HTTPStatusError("error", request=None, response=None),
 )
 def test_sleep_unsuccessful(mock_post):

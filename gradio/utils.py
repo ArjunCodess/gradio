@@ -54,7 +54,7 @@ from typing import (
 
 import anyio
 import gradio_client.utils as client_utils
-import httpx
+import httpx2 as httpx
 import orjson
 from gradio_client.documentation import document
 from gradio_client.exceptions import AppError

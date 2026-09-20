@@ -9,7 +9,7 @@ import sys
 import time
 from pathlib import Path
 
-import httpx
+import httpx2 as httpx
 from huggingface_hub.constants import HF_HOME
 
 from gradio.exceptions import ChecksumMismatchError

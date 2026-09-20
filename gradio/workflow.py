@@ -24,7 +24,7 @@ from concurrent.futures import ThreadPoolExecutor
 from typing import TYPE_CHECKING, Optional, TypedDict, Union, get_type_hints
 
 import anyio
-import httpx
+import httpx2 as httpx
 from gradio_client import Client, handle_file
 from gradio_client import utils as client_utils
 from huggingface_hub import HfApi

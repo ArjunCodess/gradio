@@ -32,7 +32,7 @@ from urllib.parse import urlencode
 
 import anyio
 import fastapi
-import httpx
+import httpx2 as httpx
 import markupsafe
 import orjson
 from fastapi import (

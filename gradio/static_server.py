@@ -219,7 +219,7 @@ class StaticWorkerPool:
             self.workers.append(process)
 
         # Wait for workers to be ready
-        import httpx
+        import httpx2 as httpx
 
         for port in self.ports:
             for _ in range(50):
